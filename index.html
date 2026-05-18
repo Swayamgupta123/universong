@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universong — One song, every platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --card: #18181b;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --text: #f4f4f5;
+      --muted: #71717a;
+      --hint: #3f3f46;
+      --green: #1DB954;
+      --green-dim: rgba(29,185,84,0.12);
+      --green-glow: rgba(29,185,84,0.25);
+      --syne: 'Syne', sans-serif;
+      --dm: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--dm);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background mesh ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(29,185,84,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(29,185,84,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Noise grain overlay ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.75rem 0 0;
+      margin-bottom: 5rem;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .logo {
+      font-family: var(--syne);
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--green-glow);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.85); }
+    }
+
+    .nav-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-family: var(--syne);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      animation: fadeUp 0.7s ease 0.1s both;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-family: var(--syne);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-eyebrow svg { opacity: 0.8; }
+
+    h1 {
+      font-family: var(--syne);
+      font-size: clamp(2.6rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    h1 .accent {
+      color: var(--green);
+      text-shadow: 0 0 40px var(--green-glow);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ── Input card ── */
+    .input-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      animation: fadeUp 0.7s ease 0.2s both;
+      transition: border-color 0.3s;
+    }
+
+    .input-card:focus-within {
+      border-color: rgba(29,185,84,0.3);
+      box-shadow: 0 0 0 4px rgba(29,185,84,0.06);
+    }
+
+    .input-label {
+      font-family: var(--syne);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .link-input {
+      flex: 1;
+      height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 16px;
+      font-family: var(--dm);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      min-width: 0;
+    }
+
+    .link-input::placeholder { color: var(--hint); }
+
+    .link-input:focus {
+      border-color: rgba(29,185,84,0.5);
+      box-shadow: 0 0 0 3px rgba(29,185,84,0.08);
+    }
+
+    .go-btn {
+      height: 48px;
+      padding: 0 22px;
+      background: var(--green);
+      border: none;
+      border-radius: 12px;
+      font-family: var(--syne);
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .go-btn:hover {
+      background: #22d460;
+      box-shadow: 0 0 24px var(--green-glow);
+    }
+
+    .go-btn:active { transform: scale(0.96); }
+    .go-btn:disabled { background: var(--hint); cursor: not-allowed; box-shadow: none; }
+
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      margin-top: 1.1rem;
+    }
+
+    .ex-label {
+      font-size: 12px;
+      color: var(--hint);
+    }
+
+    .ex-chip {
+      font-size: 12px;
+      font-family: var(--dm);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .ex-chip:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-dim);
+    }
+
+    /* ── Status boxes ── */
+    .status {
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      font-size: 14px;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .status.loading {
+      display: flex;
+      background: rgba(29,185,84,0.08);
+      border: 1px solid rgba(29,185,84,0.2);
+      color: var(--green);
+    }
+
+    .status.error {
+      display: flex;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result card ── */
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .result-card.visible {
+      display: block;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    /* Song header */
+    .song-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(29,185,84,0.04) 0%, transparent 60%);
+    }
+
+    .song-art-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .song-art {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .song-art-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border: 1px solid var(--border);
+    }
+
+    .song-meta { flex: 1; min-width: 0; }
+
+    .song-title {
+      font-family: var(--syne);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-artist {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .meta-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-size: 10px;
+      font-family: monospace;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--hint);
+      border: 1px solid var(--border);
+      letter-spacing: 0.05em;
+    }
+
+    /* Platforms */
+    .platforms-wrap {
+      padding: 1.5rem;
+    }
+
+    .section-label {
+      font-family: var(--syne);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--hint);
+      margin-bottom: 1rem;
+    }
+
+    .platforms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .platform-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      cursor: pointer;
+    }
+
+    .platform-row.available:hover {
+      background: rgba(255,255,255,0.03);
+      border-color: var(--border-hover);
+      transform: translateX(3px);
+    }
+
+    .platform-row.unavailable {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .platform-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .platform-info { flex: 1; min-width: 0; }
+
+    .platform-name {
+      font-family: var(--syne);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .platform-sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 300;
+      margin-top: 2px;
+    }
+
+    .platform-arrow {
+      font-size: 16px;
+      color: var(--hint);
+      transition: color 0.15s;
+    }
+
+    .platform-row.available:hover .platform-arrow { color: var(--green); }
+
+    /* Share strip */
+    .share-strip {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+    }
+
+    .share-input {
+      flex: 1;
+      height: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 0 12px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--muted);
+      outline: none;
+      min-width: 0;
+    }
+
+    .copy-btn {
+      height: 40px;
+      padding: 0 16px;
+      background: transparent;
+      border: 1px solid var(--border-hover);
+      border-radius: 9px;
+      font-family: var(--syne);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover { background: rgba(255,255,255,0.05); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(29,185,84,0.4); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--hint);
+      font-size: 13px;
+      font-weight: 300;
+      animation: fadeUp 0.7s ease 0.4s both;
+    }
+
+    footer a { color: var(--green); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .input-row { flex-direction: column; }
+      .go-btn { width: 100%; }
+      h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <nav>
+      <a class="logo" href="#">
+        <span class="logo-dot"></span>
+        Universong
+      </a>
+      <span class="nav-tag">Powered by Odesli</span>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19V6l12-3v13M9 19c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm12-3c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM9 10l12-3"/></svg>
+        Universal Music Links
+      </div>
+      <h1>One song,<br><span class="accent">every platform</span></h1>
+      <p class="hero-sub">Paste any song link. Get it on Spotify, Apple Music, YouTube Music, Deezer, Tidal, and more — instantly.</p>
+    </section>
+
+    <div class="input-card">
+      <span class="input-label">Paste a song link</span>
+      <div class="input-row">
+        <input
+          class="link-input"
+          id="songUrl"
+          type="url"
+          placeholder="https://open.spotify.com/track/..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="go-btn" id="goBtn" onclick="fetchSong()">Find it →</button>
+      </div>
+      <div class="examples">
+        <span class="ex-label">Try:</span>
+        <button class="ex-chip" onclick="tryExample('spotify')">● Spotify</button>
+        <button class="ex-chip" onclick="tryExample('apple')">● Apple Music</button>
+        <button class="ex-chip" onclick="tryExample('youtube')">● YouTube Music</button>
+      </div>
+    </div>
+
+    <div class="status loading" id="loadingBox">
+      <div class="spinner"></div>
+      <span>Matching your song across platforms...</span>
+    </div>
+
+    <div class="status error" id="errorBox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" flex-shrink="0" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorMsg">Could not find this song. Please check the link and try again.</span>
+    </div>
+
+    <div class="result-card" id="resultCard">
+
+      <div class="song-header">
+        <div class="song-art-wrap">
+          <img class="song-art" id="songArt" src="" alt="" style="display:none;" />
+          <div class="song-art-placeholder" id="songArtPlaceholder">♪</div>
+        </div>
+        <div class="song-meta">
+          <div class="song-title" id="songTitle">Song Title</div>
+          <div class="song-artist" id="songArtist">Artist Name</div>
+          <div class="meta-tags" id="metaTags"></div>
+        </div>
+      </div>
+
+      <div class="platforms-wrap">
+        <div class="section-label">Listen on</div>
+        <div class="platforms-list" id="platformsList"></div>
+      </div>
+
+      <div class="share-strip">
+        <input class="share-input" id="shareUrl" readonly placeholder="song.link/..." />
+        <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy link</button>
+      </div>
+    </div>
+
+    <footer>
+      Built with <a href="https://odesli.co" target="_blank">Odesli / song.link API</a> · No API key required · Free to deploy
+    </footer>
+
+  </div>
+
+  <script>
+    // ── Example URLs ──────────────────────────────────────────────
+    const EXAMPLES = {
+      spotify: 'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT',
+      apple:   'https://music.apple.com/us/album/bohemian-rhapsody/1440650428?i=1440650633',
+      youtube: 'https://music.youtube.com/watch?v=fJ9rUzIMcZQ'
+    };
+
+    // ── Platform definitions ──────────────────────────────────────
+    const PLATFORMS = [
+      {
+        key: 'spotify',
+        name: 'Spotify',
+        sub: 'Stream & discover',
+        color: '#1DB954',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`
+      },
+      {
+        key: 'appleMusic',
+        name: 'Apple Music',
+        sub: 'iOS, Mac & web',
+        color: '#fc3c44',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.22 1.3-2.2 3.88.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.64M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>`
+      },
+      {
+        key: 'youtubeMusic',
+        name: 'YouTube Music',
+        sub: 'Free & Premium',
+        color: '#FF0000',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
+      },
+      {
+        key: 'youtube',
+        name: 'YouTube',
+        sub: 'Browser playback, free',
+        color: '#FF0000',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
+      },
+      {
+        key: 'deezer',
+        name: 'Deezer',
+        sub: 'Hi-fi audio streaming',
+        color: '#A238FF',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.81 4.16v3.03H24V4.16h-5.19zM6.27 8.38v3.03h5.19V8.38H6.27zm6.27 0v3.03h5.19V8.38h-5.19zm6.27 0v3.03H24V8.38h-5.19zM6.27 12.6v3.03h5.19V12.6H6.27zm6.27 0v3.03h5.19V12.6h-5.19zm6.27 0v3.03H24V12.6h-5.19zM0 16.81v3.03h5.19v-3.03H0zm6.27 0v3.03h5.19v-3.03H6.27zm6.27 0v3.03h5.19v-3.03h-5.19zm6.27 0v3.03H24v-3.03h-5.19z"/></svg>`
+      },
+      {
+        key: 'tidal',
+        name: 'Tidal',
+        sub: 'Lossless & hi-res audio',
+        color: '#00FFFF',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="black"><path d="M12.012 3.992L8.008 7.996 4.004 3.992 0 7.996l4.004 4.004 4.004-4.004 4.004 4.004 4.004-4.004zM8.008 12l-4.004 4.004L0 12.004l4.004-4.004zM12.012 16.004L8.008 12l-4.004 4.004 4.004 4.004zM16.016 12L12.012 8l-4.004 4.004 4.004 4.004L24 8.004l-4.004-4.004z"/></svg>`
+      },
+      {
+        key: 'amazonMusic',
+        name: 'Amazon Music',
+        sub: 'Prime & Unlimited',
+        color: '#26A9E0',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M13.958 10.09c0 1.232.029 2.256-.591 3.351-.502.891-1.301 1.438-2.186 1.438-1.214 0-1.922-.924-1.922-2.292 0-2.692 2.415-3.182 4.7-3.182v.685zm3.186 7.705c-.209.189-.512.201-.745.074-1.047-.872-1.234-1.276-1.814-2.106-1.734 1.768-2.962 2.297-5.209 2.297-2.66 0-4.731-1.641-4.731-4.925 0-2.565 1.391-4.309 3.37-5.164 1.715-.754 4.11-.891 5.942-1.095v-.41c0-.753.06-1.642-.383-2.294-.385-.581-1.123-.82-1.775-.82-1.205 0-2.277.618-2.54 1.897-.054.285-.261.567-.549.582l-3.076-.333c-.259-.056-.548-.266-.472-.66.71-3.706 4.06-4.823 7.066-4.823 1.537 0 3.547.41 4.758 1.574 1.538 1.436 1.392 3.352 1.392 5.438v4.923c0 1.481.616 2.13 1.195 2.929.206.289.25.635-.01.848-.647.541-1.794 1.537-2.42 2.097l-.001-.001z"/></svg>`
+      },
+      {
+        key: 'pandora',
+        name: 'Pandora',
+        sub: 'US listeners only',
+        color: '#005483',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M0 0v24h8.86c5.507 0 9.657-3.844 9.657-9.139 0-4.104-2.765-7.224-6.522-8.197v-.08C13.815 5.746 15.22 3.479 15.22 0zm8.642 13.99H4.49V9.398h4.152c1.537 0 2.765.97 2.765 2.296 0 1.326-1.228 2.296-2.765 2.296z"/></svg>`
+      },
+      {
+        key: 'soundcloud',
+        name: 'SoundCloud',
+        sub: 'Fan-powered audio',
+        color: '#ff5500',
+        icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M1.175 12.225c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.27-2.154c-.009-.06-.05-.1-.1-.1zm-.899.828c-.06 0-.091.037-.104.094L0 14.479l.172 1.308c.013.06.045.094.104.094.056 0 .09-.034.104-.094l.195-1.308-.195-1.332c-.014-.057-.048-.094-.104-.094zm1.8-.434c-.066 0-.119.054-.128.12l-.207 1.74.207 1.694c.009.068.062.12.128.12.067 0 .119-.052.129-.12l.236-1.694-.236-1.74c-.01-.066-.062-.12-.129-.12zm.9-.2c-.08 0-.146.064-.155.143l-.181 1.94.181 1.87c.009.078.075.143.155.143.082 0 .147-.065.156-.143l.205-1.87-.205-1.94c-.009-.079-.074-.143-.156-.143zm3.636-3.36c-.194-.14-.411-.238-.643-.292a3.8 3.8 0 0 0-.785-.08c-.342 0-.658.078-.94.218a5.3 5.3 0 0 0-.88.61c-.197.184-.305.433-.305.699l.002 6.574c.006.224.179.407.402.43l.001.001h3.148c.228 0 .41-.183.41-.41V10.02c0-.226-.123-.426-.31-.546zm4.044-.756c-.109-.028-.221-.044-.334-.044-.474 0-.912.19-1.234.499-.15-.397-.474-.705-.887-.836a1.633 1.633 0 0 0-.51-.082c-.185 0-.362.033-.523.093l.002 8.09c0 .226.183.41.41.41h3.076c.226 0 .41-.184.41-.41V9.61a1.643 1.643 0 0 0-.41-1.097zm3.6-.498c-.452 0-.87.143-1.21.384V18.7c0 .226.183.41.41.41h1.6c.226 0 .41-.184.41-.41V8.53a1.87 1.87 0 0 0-1.21-.465zm3.6 2.155a3.63 3.63 0 0 0-1.59-1.498 3.54 3.54 0 0 0-1.591-.368c-.29 0-.57.044-.836.123V18.7c0 .226.183.41.41.41h5.1c.226 0 .41-.184.41-.41V12.98c0-1.363-.624-2.582-1.903-3.02z"/></svg>`
+      },
+    ];
+
+    // ── Example loader ────────────────────────────────────────────
+    function tryExample(platform) {
+      document.getElementById('songUrl').value = EXAMPLES[platform];
+      fetchSong();
+    }
+
+    // ── Main fetch ────────────────────────────────────────────────
+    async function fetchSong() {
+      const url = document.getElementById('songUrl').value.trim();
+      if (!url) {
+        document.getElementById('songUrl').focus();
+        return;
+      }
+
+      // Validate it looks like a URL
+      if (!url.startsWith('http')) {
+        showError('Please paste a full URL (starting with https://)');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const apiUrl = `https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(url)}&userCountry=US&songIfSingle=true`;
+        const res = await fetch(apiUrl);
+
+        if (res.status === 429) throw new Error('rate_limit');
+        if (!res.ok) throw new Error('api_error');
+
+        const data = await res.json();
+
+        if (!data.entitiesByUniqueId || Object.keys(data.entitiesByUniqueId).length === 0) {
+          throw new Error('not_found');
+        }
+
+        renderResult(data);
+      } catch (e) {
+        const msgs = {
+          rate_limit: 'Too many requests. Please wait a moment and try again.',
+          not_found: 'Song not found. Make sure the link is to a specific track (not a playlist or album).',
+          api_error: 'Could not reach the music database. Please try again.',
+        };
+        showError(msgs[e.message] || 'Something went wrong. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // ── Render result ─────────────────────────────────────────────
+    function renderResult(data) {
+      const entity = Object.values(data.entitiesByUniqueId || {})[0] || {};
+      const title  = entity.title      || 'Unknown Song';
+      const artist = entity.artistName || 'Unknown Artist';
+      const art    = entity.thumbnailUrl || '';
+      const isrc   = entity.isrc || '';
+      const type   = entity.type || '';
+
+      document.getElementById('songTitle').textContent  = title;
+      document.getElementById('songArtist').textContent = artist;
+
+      // Art
+      if (art) {
+        const img = document.getElementById('songArt');
+        img.src = art;
+        img.style.display = 'block';
+        document.getElementById('songArtPlaceholder').style.display = 'none';
+      } else {
+        document.getElementById('songArt').style.display = 'none';
+        document.getElementById('songArtPlaceholder').style.display = 'flex';
+      }
+
+      // Meta tags
+      const tagsEl = document.getElementById('metaTags');
+      tagsEl.innerHTML = '';
+      if (isrc) {
+        const tag = document.createElement('span');
+        tag.className = 'meta-tag';
+        tag.textContent = 'ISRC: ' + isrc;
+        tagsEl.appendChild(tag);
+      }
+      if (type) {
+        const tag = document.createElement('span');
+        tag.className = 'meta-tag';
+        tag.textContent = type;
+        tagsEl.appendChild(tag);
+      }
+
+      // Platforms
+      const links = data.linksByPlatform || {};
+      const list  = document.getElementById('platformsList');
+      list.innerHTML = '';
+
+      PLATFORMS.forEach((p, i) => {
+        const link = links[p.key];
+        const row  = document.createElement('a');
+        row.style.animationDelay = `${i * 40}ms`;
+        row.style.animation = 'fadeUp 0.4s ease both';
+
+        if (link) {
+          row.href   = link.url;
+          row.target = '_blank';
+          row.rel    = 'noopener noreferrer';
+          row.className = 'platform-row available';
+        } else {
+          row.className = 'platform-row unavailable';
+        }
+
+        row.innerHTML = `
+          <div class="platform-icon" style="background:${p.color};">${p.icon}</div>
+          <div class="platform-info">
+            <div class="platform-name">${p.name}</div>
+            <div class="platform-sub">${link ? p.sub : 'Not available'}</div>
+          </div>
+          ${link ? '<span class="platform-arrow">→</span>' : ''}
+        `;
+
+        list.appendChild(row);
+      });
+
+      // Share URL
+      document.getElementById('shareUrl').value = data.pageUrl || '';
+
+      // Show card
+      document.getElementById('resultCard').classList.add('visible');
+      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ── Copy link ─────────────────────────────────────────────────
+    function copyLink() {
+      const val = document.getElementById('shareUrl').value;
+      if (!val) return;
+      navigator.clipboard.writeText(val).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy link';
+          btn.classList.remove('copied');
+        }, 2500);
+      });
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────
+    function setLoading(on) {
+      document.getElementById('loadingBox').style.display  = on ? 'flex' : 'none';
+      document.getElementById('errorBox').style.display    = 'none';
+      document.getElementById('goBtn').disabled            = on;
+      if (on) document.getElementById('resultCard').classList.remove('visible');
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent     = msg;
+      document.getElementById('errorBox').style.display   = 'flex';
+      document.getElementById('loadingBox').style.display = 'none';
+    }
+
+    // Enter key support
+    document.getElementById('songUrl').addEventListener('keydown', e => {
+      if (e.key === 'Enter') fetchSong();
+    });
+
+    // Auto-paste from clipboard on focus if empty (optional UX touch)
+    document.getElementById('songUrl').addEventListener('focus', async () => {
+      const input = document.getElementById('songUrl');
+      if (input.value) return;
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && (text.includes('spotify.com') || text.includes('music.apple.com') || text.includes('music.youtube.com'))) {
+          input.value = text;
+        }
+      } catch (_) { /* clipboard permission denied, ignore */ }
+    });
+  </script>
+</body>
+</html>
